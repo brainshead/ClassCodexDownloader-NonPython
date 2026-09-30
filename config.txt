@@ -1,0 +1,7 @@
+# Leave blank for automatic WoW Retail detection.
+# For testing, set this to ANY existing folder. ClassCodex will be installed
+# directly inside that exact folder.
+#
+# Example:
+# ADDONS_PATH=C:\Temp\ClassCodex-Test-Target
+ADDONS_PATH=
