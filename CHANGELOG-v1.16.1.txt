@@ -1,0 +1,12 @@
+ClassCodex Windows + macOS Downloader v1.16.1
+==============================================
+
+v1.16.1
+-------
+- Removed NTFS hard-link snapshots from the Windows updater.
+- Removed hard-link snapshots from the macOS updater.
+- Snapshots are now ordinary independent copies used only for history/rollback.
+- The live WoW ClassCodex installation remains the update baseline.
+- Unchanged files are still left untouched during normal incremental updates.
+- No snapshot files are copied back into the live AddOn during updates.
+- macOS support from v1.16.1 is retained.
