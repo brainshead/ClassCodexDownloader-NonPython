@@ -43,14 +43,14 @@ osascript "$ROOT/jxjson.js" manifest "$TMP/manifest.json" > "$TMP/files.tsv"
 [ -s "$TMP/files.tsv" ] || fail "Manifest contains no files."
 
 mkdir -p "$TMP/stage"
-declare -A EXPECTED_SIZE EXPECTED_HASH
+declare -A EXPECTED_SIZE EXPECTED_HASH ENCODED_PATH
 declare -a DOWNLOAD_PATHS LIVE_FILES
 while IFS=$'\t' read -r rel size hash encoded; do
   case "$rel" in ClassCodex/*) short="${rel#ClassCodex/}" ;; *) fail "Unsafe manifest path: $rel" ;; esac
   case "/$short/" in *"/../"*) fail "Unsafe manifest path: $rel" ;; esac
   [ -n "$short" ] || fail "Empty manifest path."
   [ -n "${EXPECTED_SIZE[$short]+x}" ] && fail "Duplicate manifest path: $rel"
-  EXPECTED_SIZE[$short]="$size"; EXPECTED_HASH[$short]="$hash"
+  EXPECTED_SIZE[$short]="$size"; EXPECTED_HASH[$short]="$hash"; ENCODED_PATH[$short]="$encoded"
   livefile="$LIVE/$short"
   if [ -f "$livefile" ] && [ "$(stat -f '%z' "$livefile")" = "$size" ] && [ "$(shasum -a 256 "$livefile" | awk '{print tolower($1)}')" = "$hash" ]; then
     continue
@@ -71,7 +71,7 @@ if [ "${#DOWNLOAD_PATHS[@]}" -eq 0 ] && [ "${#REMOVED[@]}" -eq 0 ]; then
 fi
 
 for rel in "${DOWNLOAD_PATHS[@]}"; do
-  urlpath="$(python3 -c 'import sys,urllib.parse; print("/".join(urllib.parse.quote(x,safe="") for x in sys.argv[1].split("/")))' "$rel")"
+  urlpath="${ENCODED_PATH[$rel]}""
   dest="$TMP/stage/$rel"; mkdir -p "$(dirname "$dest")"
   curl -fsSL --max-time 120 "$CDN/builds/retail/$BUILD/ClassCodex/$urlpath" -o "$dest"
   [ "$(stat -f '%z' "$dest")" = "${EXPECTED_SIZE[$rel]}" ] || fail "Size verification failed: $rel"
