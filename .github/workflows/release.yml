@@ -1,0 +1,31 @@
+name: Build and publish ZIP release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Validate macOS shell syntax
+        run: |
+          bash -n macOS/Update-ClassCodex.sh
+          bash -n macOS/ClassCodex-Diff.sh
+      - name: Package release
+        run: |
+          mkdir -p dist
+          zip -r "dist/ClassCodexDownloader-${GITHUB_REF_NAME}.zip" \
+            README.md README-v1.16.1.txt CHANGELOG-v1.16.1.txt NOTICE.md config.txt \
+            Update-ClassCodex.ps1 Update-ClassCodex.bat ClassCodex-Diff.ps1 ClassCodex-Diff.bat macOS
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: dist/ClassCodexDownloader-${{ github.ref_name }}.zip
