@@ -334,7 +334,7 @@ try{
 
 $answer=Read-Host "Generate detailed update summary now? [Y/N]"
 if($answer-match"^[Yy]$"){
-    $psExe=Join-Path $env:SystemRoot "System32WindowsPowerShell1.0powershell.exe";$diffScript=Join-Path $Root "ClassCodex-Diff.ps1"
+    $psExe=Join-Path $env:SystemRoot "System32\WindowsPowerShell\v1.0\powershell.exe";$diffScript=Join-Path $Root "ClassCodex-Diff.ps1"
     Unblock-File -LiteralPath $diffScript -ErrorAction SilentlyContinue
     & $psExe -NoProfile -ExecutionPolicy Bypass -File $diffScript -NewBuild $build
     if($LASTEXITCODE-ne 0){throw "ClassCodex-Diff failed with exit code $LASTEXITCODE."}
