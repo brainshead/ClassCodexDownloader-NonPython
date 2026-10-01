@@ -71,7 +71,7 @@ if [ "${#DOWNLOAD_PATHS[@]}" -eq 0 ] && [ "${#REMOVED[@]}" -eq 0 ]; then
 fi
 
 for rel in "${DOWNLOAD_PATHS[@]}"; do
-  urlpath="${ENCODED_PATH[$rel]}""
+  urlpath="${ENCODED_PATH[$rel]}"
   dest="$TMP/stage/$rel"; mkdir -p "$(dirname "$dest")"
   curl -fsSL --max-time 120 "$CDN/builds/retail/$BUILD/ClassCodex/$urlpath" -o "$dest"
   [ "$(stat -f '%z' "$dest")" = "${EXPECTED_SIZE[$rel]}" ] || fail "Size verification failed: $rel"
