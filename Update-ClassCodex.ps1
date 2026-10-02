@@ -201,7 +201,7 @@ try{
     foreach($f in $items){
         $rel=[string]$f.path
         if(!$rel.StartsWith("ClassCodex/")-or$rel.Split("/")-contains".."){throw "Unsafe manifest path: $rel"}
-        $shortRel=($rel.Substring("ClassCodex/".Length) -replace "/","")
+        $shortRel=($rel.Substring("ClassCodex/".Length) .Replace('/','\'))
         if($manifestMap.ContainsKey($shortRel)){throw "Duplicate manifest path: $rel"}
         $manifestMap[$shortRel]=$f
     }
@@ -245,7 +245,7 @@ try{
         foreach($f in $items){
             $rel=[string]$f.path
             $shortRel=$rel.Substring("ClassCodex/".Length)
-            $liveFile=Join-Path $live ($shortRel -replace "/","")
+            $liveFile=Join-Path $live ($shortRel .Replace('/','\'))
             $needsDownload=$true
 
             if(Test-Path -LiteralPath $liveFile -PathType Leaf){
@@ -300,7 +300,7 @@ try{
             $f=$downloadItems[$i]
             $rel=[string]$f.path
             $shortRel=$rel.Substring("ClassCodex/".Length)
-            $dest=Join-Path $stage ($shortRel -replace "/","")
+            $dest=Join-Path $stage ($shortRel .Replace('/','\'))
             New-Item -ItemType Directory -Force -Path (Split-Path $dest -Parent)|Out-Null
             $encoded=($rel-split"/"|ForEach-Object{[uri]::EscapeDataString($_)})-join"/"
             Write-Progress -Activity "Downloading ClassCodex" -Status "$($i+1) / $($downloadItems.Count): $rel" -PercentComplete ([int](($i+1)*100/$downloadItems.Count))
@@ -315,8 +315,8 @@ try{
         foreach($f in $items){
             $rel=[string]$f.path
             $shortRel=$rel.Substring("ClassCodex/".Length)
-            $liveFile=Join-Path $live ($shortRel -replace "/","")
-            $stageFile=Join-Path $stage ($shortRel -replace "/","")
+            $liveFile=Join-Path $live ($shortRel .Replace('/','\'))
+            $stageFile=Join-Path $stage ($shortRel .Replace('/','\'))
             $source=$null
             if(Test-Path -LiteralPath $stageFile -PathType Leaf){$source=$stageFile}
             elseif(Test-Path -LiteralPath $liveFile -PathType Leaf){$source=$liveFile}
@@ -330,7 +330,7 @@ try{
         # Remove the old live file before moving in the verified replacement.
         # immutable. Obsolete files are removed only after all downloads are verified.
         foreach($oldRel in @($removedFiles | Sort-Object)){
-            $oldPath=Join-Path $live ($oldRel -replace "/","")
+            $oldPath=Join-Path $live ($oldRel .Replace('/','\'))
             if(Test-Path -LiteralPath $oldPath -PathType Leaf){
                 Remove-Item -LiteralPath $oldPath -Force
                 Write-Host "Removed: $oldRel" -ForegroundColor Yellow
@@ -340,8 +340,8 @@ try{
         foreach($f in $downloadItems){
             $rel=[string]$f.path
             $shortRel=$rel.Substring("ClassCodex/".Length)
-            $stageFile=Join-Path $stage ($shortRel -replace "/","")
-            $liveFile=Join-Path $live ($shortRel -replace "/","")
+            $stageFile=Join-Path $stage ($shortRel .Replace('/','\'))
+            $liveFile=Join-Path $live ($shortRel .Replace('/','\'))
             New-Item -ItemType Directory -Force -Path (Split-Path $liveFile -Parent)|Out-Null
             if(Test-Path -LiteralPath $liveFile -PathType Leaf){Remove-Item -LiteralPath $liveFile -Force}
             Move-Item -LiteralPath $stageFile -Destination $liveFile -Force
