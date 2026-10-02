@@ -109,7 +109,7 @@ if($configuredAddons){
         try{if(Test-Path -LiteralPath $key){$v=Get-ItemProperty -LiteralPath $key -ErrorAction Stop;foreach($n in @("InstallPath","GamePath")){if($v.$n){[void]$roots.Add([string]$v.$n)}}}}catch{}
     }
     foreach($base in @($env:ProgramFiles,${env:ProgramFiles(x86)})){if($base){[void]$roots.Add((Join-Path $base "World of Warcraft"))}}
-    foreach($drive in [Environment]::GetLogicalDrives()){[void]$roots.Add((Join-Path $drive "World of Warcraft"));[void]$roots.Add((Join-Path $drive "Games\World of Warcraft"))}
+    foreach($drive in [Environment]::GetLogicalDrives()){[void]$roots.Add((Join-Path $drive "World of Warcraft"));[void]$roots.Add((Join-Path $drive "Games\World of Warcraft"));[void]$roots.Add((Join-Path $drive "Blizzard\World of Warcraft"))}
     $found=New-Object System.Collections.Generic.List[string]
     foreach($r in $roots){
         if(!$r){continue};$r=[Environment]::ExpandEnvironmentVariables(([string]$r).Trim('"'))
@@ -126,7 +126,7 @@ if($configuredAddons){
     }else{
         $wowRoot=Read-Host "Enter your WoW root folder (the folder containing _retail_)"
         if(!$wowRoot){throw "No WoW folder was entered."}
-        $AddonsPath=Join-Path ([Environment]::ExpandEnvironmentVariables($wowRoot.Trim('"'))) "_retail_InterfaceAddOns"
+        $AddonsPath=Join-Path ([Environment]::ExpandEnvironmentVariables($wowRoot.Trim('"'))) "_retail_\Interface\AddOns"
     }
 }
 if(!(Test-Path -LiteralPath $AddonsPath -PathType Container)){throw "AddOns target folder not found: $AddonsPath"}
