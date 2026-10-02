@@ -22,7 +22,7 @@ function Get-RelativeFiles([string]$basePath) {
     $map=@{}
     if(!(Test-Path -LiteralPath $basePath -PathType Container)){ return $map }
     foreach($f in Get-ChildItem -LiteralPath $basePath -Recurse -File){
-        $rel=$f.FullName.Substring($basePath.Length).TrimStart([char[]]('/'))
+        $rel=$f.FullName.Substring($basePath.Length).TrimStart([char[]]('/\\'))
         $map[$rel]=$f
     }
     return $map
@@ -105,16 +105,16 @@ if($configuredAddons){
     Write-Host "Using configured AddOns target: $AddonsPath" -ForegroundColor Yellow
 }else{
     $roots=New-Object System.Collections.Generic.List[string]
-    foreach($key in @("HKCU:SoftwareBlizzard EntertainmentWorld of Warcraft","HKLM:SoftwareBlizzard EntertainmentWorld of Warcraft","HKLM:SoftwareWOW6432NodeBlizzard EntertainmentWorld of Warcraft")){
+    foreach($key in @("HKCU:\Software\Blizzard Entertainment\World of Warcraft","HKLM:\Software\Blizzard Entertainment\World of Warcraft","HKLM:\Software\WOW6432Node\Blizzard Entertainment\World of Warcraft")){
         try{if(Test-Path -LiteralPath $key){$v=Get-ItemProperty -LiteralPath $key -ErrorAction Stop;foreach($n in @("InstallPath","GamePath")){if($v.$n){[void]$roots.Add([string]$v.$n)}}}}catch{}
     }
     foreach($base in @($env:ProgramFiles,${env:ProgramFiles(x86)})){if($base){[void]$roots.Add((Join-Path $base "World of Warcraft"))}}
-    foreach($drive in [Environment]::GetLogicalDrives()){[void]$roots.Add((Join-Path $drive "World of Warcraft"));[void]$roots.Add((Join-Path $drive "GamesWorld of Warcraft"))}
+    foreach($drive in [Environment]::GetLogicalDrives()){[void]$roots.Add((Join-Path $drive "World of Warcraft"));[void]$roots.Add((Join-Path $drive "Games\World of Warcraft"))}
     $found=New-Object System.Collections.Generic.List[string]
     foreach($r in $roots){
         if(!$r){continue};$r=[Environment]::ExpandEnvironmentVariables(([string]$r).Trim('"'))
         if($r -match '(?i)[\/]_retail_[\/]?$'){$r=Split-Path $r -Parent}
-        if((Split-Path $r -Leaf) -ieq "AddOns"){$a=$r}else{$a=Join-Path $r "_retail_InterfaceAddOns"}
+        if((Split-Path $r -Leaf) -ieq "AddOns"){$a=$r}else{$a=Join-Path $r "_retail_\Interface\AddOns"}
         if(Test-Path -LiteralPath $a -PathType Container){$q=(Resolve-Path -LiteralPath $a).Path;if($q -notin $found){[void]$found.Add($q)}}
     }
     if($found.Count -eq 1){$AddonsPath=$found[0];Write-Host "Detected WoW Retail AddOns: $AddonsPath" -ForegroundColor Green}
@@ -310,7 +310,7 @@ try{
         if(Test-Path -LiteralPath $snap){Remove-Item -LiteralPath $snap -Recurse -Force}
         New-Item -ItemType Directory -Force -Path $snap|Out-Null
         foreach($file in Get-ChildItem -LiteralPath $live -Recurse -File){
-            $rel=$file.FullName.Substring($live.Length).TrimStart([char[]]('/'))
+            $rel=$file.FullName.Substring($live.Length).TrimStart([char[]]('/\\'))
             $snapFile=Join-Path $snap $rel
             New-Item -ItemType Directory -Force -Path (Split-Path $snapFile -Parent)|Out-Null
             Copy-Item -LiteralPath $file.FullName -Destination $snapFile -Force
