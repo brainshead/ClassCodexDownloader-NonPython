@@ -130,8 +130,8 @@ if($configuredAddons){
         foreach($viewName in @("Registry64","Registry32")){
             $baseKey=$null
             try{
-                $hive=[Microsoft.Win32.RegistryHive]::$hiveName
-                $view=[Microsoft.Win32.RegistryView]::$viewName
+                $hive=[System.Enum]::Parse([Microsoft.Win32.RegistryHive],$hiveName)
+                $view=[System.Enum]::Parse([Microsoft.Win32.RegistryView],$viewName)
                 $baseKey=[Microsoft.Win32.RegistryKey]::OpenBaseKey($hive,$view)
                 foreach($subKey in $registryPaths){
                     $key=$null
