@@ -104,24 +104,75 @@ if($configuredAddons){
     $AddonsPath=(Resolve-Path -LiteralPath $configuredAddons).Path
     Write-Host "Using configured AddOns target: $AddonsPath" -ForegroundColor Yellow
 }else{
-    $roots=New-Object System.Collections.Generic.List[string]
-    foreach($key in @("HKCU:\Software\Blizzard Entertainment\World of Warcraft","HKLM:\Software\Blizzard Entertainment\World of Warcraft","HKLM:\Software\WOW6432Node\Blizzard Entertainment\World of Warcraft")){
-        try{if(Test-Path -LiteralPath $key){$v=Get-ItemProperty -LiteralPath $key -ErrorAction Stop;foreach($n in @("InstallPath","GamePath")){if($v.$n){[void]$roots.Add([string]$v.$n)}}}}catch{}
+    function Add-WowAddonsCandidate([string]$candidate,[System.Collections.Generic.List[string]]$list){
+        if([string]::IsNullOrWhiteSpace($candidate)){return}
+        $p=[Environment]::ExpandEnvironmentVariables($candidate.Trim().Trim('"'))
+        if(!(Test-Path -LiteralPath $p -PathType Container)){return}
+        $leaf=Split-Path -Leaf $p
+        if($leaf -ieq "AddOns"){$a=$p}
+        elseif($leaf -ieq "Interface"){$a=Join-Path $p "AddOns"}
+        elseif($leaf -ieq "_retail_"){$a=Join-Path $p "Interface\AddOns"}
+        else{$a=Join-Path $p "_retail_\Interface\AddOns"}
+        if(Test-Path -LiteralPath $a -PathType Container){
+            $resolved=(Resolve-Path -LiteralPath $a).Path
+            if($resolved -notin $list){[void]$list.Add($resolved)}
+        }
     }
-    foreach($base in @($env:ProgramFiles,${env:ProgramFiles(x86)})){if($base){[void]$roots.Add((Join-Path $base "World of Warcraft"))}}
-    foreach($drive in [Environment]::GetLogicalDrives()){[void]$roots.Add((Join-Path $drive "World of Warcraft"));[void]$roots.Add((Join-Path $drive "Games\World of Warcraft"));[void]$roots.Add((Join-Path $drive "Blizzard\World of Warcraft"))}
+
+    # Registry is the primary discovery source. Read both 64-bit and 32-bit
+    # machine views because WoW/Battle.net installations can be registered either way.
+    $registryCandidates=New-Object System.Collections.Generic.List[string]
+    $registryPaths=@(
+        "Software\Blizzard Entertainment\World of Warcraft",
+        "Software\WOW6432Node\Blizzard Entertainment\World of Warcraft"
+    )
+    foreach($hiveName in @("CurrentUser","LocalMachine")){
+        foreach($viewName in @("Registry64","Registry32")){
+            $baseKey=$null
+            try{
+                $hive=[Microsoft.Win32.RegistryHive]::$hiveName
+                $view=[Microsoft.Win32.RegistryView]::$viewName
+                $baseKey=[Microsoft.Win32.RegistryKey]::OpenBaseKey($hive,$view)
+                foreach($subKey in $registryPaths){
+                    $key=$null
+                    try{
+                        $key=$baseKey.OpenSubKey($subKey)
+                        if($key){
+                            foreach($valueName in @("InstallPath","GamePath")){
+                                $value=$key.GetValue($valueName,$null)
+                                if($value){[void]$registryCandidates.Add([string]$value)}
+                            }
+                        }
+                    }catch{}finally{if($key){$key.Dispose()}}
+                }
+            }catch{}finally{if($baseKey){$baseKey.Dispose()}}
+        }
+    }
+
     $found=New-Object System.Collections.Generic.List[string]
-    foreach($r in $roots){
-        if(!$r){continue};$r=[Environment]::ExpandEnvironmentVariables(([string]$r).Trim('"'))
-        if($r -match '(?i)[\/]_retail_[\/]?$'){$r=Split-Path $r -Parent}
-        if((Split-Path $r -Leaf) -ieq "AddOns"){$a=$r}else{$a=Join-Path $r "_retail_\Interface\AddOns"}
-        if(Test-Path -LiteralPath $a -PathType Container){$q=(Resolve-Path -LiteralPath $a).Path;if($q -notin $found){[void]$found.Add($q)}}
+    foreach($candidate in $registryCandidates){Add-WowAddonsCandidate $candidate $found}
+    if($found.Count -gt 0){
+        Write-Host "Using valid World of Warcraft install location(s) from the Windows registry." -ForegroundColor Cyan
+    }else{
+        # Registry may be missing or stale; check common install folders on each drive.
+        $roots=New-Object System.Collections.Generic.List[string]
+        foreach($base in @($env:ProgramFiles,${env:ProgramFiles(x86)})){if($base){[void]$roots.Add((Join-Path $base "World of Warcraft"))}}
+        foreach($drive in [Environment]::GetLogicalDrives()){
+            [void]$roots.Add((Join-Path $drive "World of Warcraft"))
+            [void]$roots.Add((Join-Path $drive "Games\World of Warcraft"))
+            [void]$roots.Add((Join-Path $drive "Blizzard\World of Warcraft"))
+        }
+        foreach($candidate in $roots){Add-WowAddonsCandidate $candidate $found}
     }
-    if($found.Count -eq 1){$AddonsPath=$found[0];Write-Host "Detected WoW Retail AddOns: $AddonsPath" -ForegroundColor Green}
-    elseif($found.Count -gt 1){
-        for($i=0;$i-lt$found.Count;$i++){Write-Host ("[{0}] {1}"-f($i+1),$found[$i])}
-        $pick=Read-Host "Choose the folder number";$num=0
-        if(![int]::TryParse($pick,[ref]$num)-or$num-lt1-or$num-gt$found.Count){throw "Invalid folder selection."}
+
+    if($found.Count -eq 1){
+        $AddonsPath=$found[0]
+        Write-Host "Detected WoW Retail AddOns: $AddonsPath" -ForegroundColor Green
+    }elseif($found.Count -gt 1){
+        for($i=0;$i -lt $found.Count;$i++){Write-Host ("[{0}] {1}" -f ($i+1),$found[$i])}
+        $pick=Read-Host "Choose the folder number"
+        $num=0
+        if(![int]::TryParse($pick,[ref]$num) -or $num -lt 1 -or $num -gt $found.Count){throw "Invalid folder selection."}
         $AddonsPath=$found[$num-1]
     }else{
         $wowRoot=Read-Host "Enter your WoW root folder (the folder containing _retail_)"
