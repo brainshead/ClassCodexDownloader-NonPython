@@ -384,10 +384,17 @@ try{
     }finally{if(Test-Path -LiteralPath $stage){Remove-Item -LiteralPath $stage -Recurse -Force -ErrorAction SilentlyContinue}}
 }finally{if(Test-Path -LiteralPath $manifestTmp){Remove-Item -LiteralPath $manifestTmp -Force -ErrorAction SilentlyContinue}}
 
-$answer=Read-Host "Generate detailed update summary now? [Y/N]"
-if($answer-match"^[Yy]$"){
-    $psExe=Join-Path $env:SystemRoot "System32\WindowsPowerShell\v1.0\powershell.exe";$diffScript=Join-Path $Root "ClassCodex-Diff.ps1"
-    Unblock-File -LiteralPath $diffScript -ErrorAction SilentlyContinue
-    & $psExe -NoProfile -ExecutionPolicy Bypass -File $diffScript -NewBuild $build
-    if($LASTEXITCODE-ne 0){throw "ClassCodex-Diff failed with exit code $LASTEXITCODE."}
+$diffScript=Join-Path $Root "ClassCodex-Diff.ps1"
+if(!(Test-Path -LiteralPath $diffScript -PathType Leaf)){
+    Write-Host ""
+    Write-Host "Detailed summary skipped: ClassCodex-Diff.ps1 is missing from the updater folder." -ForegroundColor Yellow
+    Write-Host "The ClassCodex update itself completed successfully."
+}else{
+    $answer=Read-Host "Generate detailed update summary now? [Y/N]"
+    if($answer -match "^[Yy]$"){
+        $psExe=Join-Path $env:SystemRoot "System32\WindowsPowerShell\v1.0\powershell.exe"
+        Unblock-File -LiteralPath $diffScript -ErrorAction SilentlyContinue
+        & $psExe -NoProfile -ExecutionPolicy Bypass -File $diffScript -NewBuild $build
+        if($LASTEXITCODE -ne 0){throw "ClassCodex-Diff failed with exit code $LASTEXITCODE."}
+    }
 }
