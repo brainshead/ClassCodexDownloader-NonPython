@@ -14,16 +14,26 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-      - name: Validate macOS shell syntax
+
+      - name: Validate shell syntax
         run: |
           bash -n macOS/Update-ClassCodex.sh
           bash -n macOS/ClassCodex-Diff.sh
+
+      - name: Validate release version
+        run: |
+          test -f "CHANGELOG-${GITHUB_REF_NAME#v}.txt"
+          test -f "README-${GITHUB_REF_NAME#v}.txt"
+
       - name: Package release
         run: |
           mkdir -p dist
           zip -r "dist/ClassCodexDownloader-${GITHUB_REF_NAME}.zip" \
-            README.md README-v1.16.1.txt CHANGELOG-v1.16.1.txt NOTICE.md config.txt \
-            Update-ClassCodex.ps1 Update-ClassCodex.bat ClassCodex-Diff.ps1 ClassCodex-Diff.bat macOS
+            README.md "README-${GITHUB_REF_NAME#v}.txt" "CHANGELOG-${GITHUB_REF_NAME#v}.txt" \
+            NOTICE.md config.txt \
+            Update-ClassCodex.ps1 Update-ClassCodex.bat \
+            ClassCodex-Diff.ps1 ClassCodex-Diff.bat macOS
+
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:

@@ -2,19 +2,20 @@
 
 An independent, non-Python adaptation of [WoWClassCodexDownloader](https://github.com/gable44/WoWClassCodexDownloader), for users who prefer Windows PowerShell or macOS shell scripts.
 
-This is **not the official downloader** and is not intended to replace or impersonate the original project.
+This is not the official downloader and is not intended to replace or impersonate the original project.
 
 ## Included release
 
-The v1.16.1 package provides:
+The v1.16.3 package provides:
 - Windows updater and detailed diff utility (PowerShell with BAT launchers)
-- macOS updater and diff utility (Bash, using macOS `osascript` JavaScript support)
+- Windows diff launcher uses the standard Windows PowerShell executable path directly
+- macOS updater and diff utility (Bash, using macOS osascript JavaScript support)
 - Configurable AddOns target path
 - Incremental updates: unchanged files are left untouched
 - Manifest and SHA-256 verification
 - Independent snapshots for history/rollback
 
-See the release notes in `CHANGELOG-v1.16.1.txt` and usage in `README-v1.16.1.txt`.
+See the release notes in CHANGELOG-v1.16.3.txt and usage in README-v1.16.3.txt.
 
 ## Upstream and licensing
 
@@ -24,4 +25,4 @@ ClassCodex addon data and associated third-party trademarks are not relicensed b
 
 ## Status
 
-Version: **1.16.1**. Use at your own discretion; test against a separate AddOns folder before using on a live installation.
+Version: 1.16.3. Use at your own discretion; test against a separate AddOns folder before using on a live installation.
