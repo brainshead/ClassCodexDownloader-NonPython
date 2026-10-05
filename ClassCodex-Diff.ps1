@@ -25,8 +25,8 @@ function Get-IcyEntries([string[]]$lines){
     if($km.Success){$key=if($km.Groups[1].Success){$km.Groups[1].Value}else{$km.Groups[2].Value};$stack.Add([pscustomobject]@{Indent=$indent;Key=$key});$inTalents=@($stack.Key)-contains "talents";continue}
     if(!$inTalents -or $line -notmatch '\\bexport\\s*=\\s*"([^"]*)"'){continue};$export=$Matches[1]
     $lm=[regex]::Match($line,'\\blabel\\s*=\\s*"([^"]*)"');$label=if($lm.Success){$lm.Groups[1].Value}else{""};$path=@($stack.Key);$ti=[array]::IndexOf($path,"talents");if($ti -lt 0){continue}
-    $class=if($ti -ge 1){$path[$ti-1]}else{"Unknown"};$hero=if($ti+1 -lt $path.Count){$path[$ti+1]}else{"Unknown"};$profile=if($ti+2 -lt $path.Count){$path[$ti+2]}else{"Unknown"};$key="$class|$hero|$profile|$label";if(!$ord.ContainsKey($key)){$ord[$key]=0};$ord[$key]++
-    $out.Add([pscustomobject]@{Class=$class;Spec=$class;HeroTree=$hero;Section=$profile;Label=$label;Export=$export;Ordinal=$ord[$key]})
+    $class=if($ti -ge 2){$path[$ti-2]}else{"Unknown"};$spec=if($ti -ge 1){$path[$ti-1]}else{"Unknown"};$hero=if($ti+1 -lt $path.Count){$path[$ti+1]}else{"Unknown"};$profile=if($ti+2 -lt $path.Count){$path[$ti+2]}else{"Unknown"};$key="$class|$spec|$hero|$profile|$label";if(!$ord.ContainsKey($key)){$ord[$key]=0};$ord[$key]++
+    $out.Add([pscustomobject]@{Class=$class;Spec=$spec;HeroTree=$hero;Section=$profile;Label=$label;Export=$export;Ordinal=$ord[$key]})
   };return $out.ToArray()
 }
 function Get-IcyMap([string[]]$lines){$m=@{};foreach($e in @(Get-IcyEntries $lines)){$k="$($e.Class)|$($e.HeroTree)|$($e.Section)|$($e.Label)|$($e.Ordinal)";$m[$k]=$e};return $m}
