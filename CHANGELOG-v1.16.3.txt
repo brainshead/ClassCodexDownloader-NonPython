@@ -1,0 +1,16 @@
+# ClassCodex Downloader — v1.16.3
+
+## Windows launcher fix
+
+- Fixed ClassCodex-Diff.bat so it no longer depends on powershell.exe being available through the Windows PATH.
+- The launcher now calls the standard Windows PowerShell executable directly from %SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe.
+- Added an explicit error when that Windows PowerShell executable cannot be found.
+- No changes were made to the repaired Icy Veins parser.
+
+## Testing status
+
+The Windows updater was successfully run against the current ClassCodex production manifest and reported the installation already up to date with 95 unchanged files and 0 files to download or remove.
+
+The Windows diff utility still needs to be rerun against the existing snapshots that previously produced Unknown class/spec/profile values.
+
+macOS/Linux runtime testing is not required from the user at this stage.

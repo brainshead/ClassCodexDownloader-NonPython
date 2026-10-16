@@ -1,0 +1,15 @@
+# ClassCodex Downloader — v1.16.2
+
+## Repair release
+
+- Restored the Windows ClassCodex diff utility to the repository.
+- Restored the Windows BAT launcher.
+- Reworked Icy Veins export parsing to derive class/spec/hero-tree/profile from the actual Lua table path instead of fixed indentation levels.
+- Verified the parser against the supplied ClassCodex Icy Veins data: 419 export entries parsed with 0 unknown class/spec/hero/profile paths.
+- Retained UGG popularity comparison.
+- Restored the missing macOS diff utility from the v1.16.1 archive; macOS feature-equivalence testing remains pending because no macOS test environment is available here.
+- Updated release packaging references for v1.16.2.
+
+## Testing status
+
+Windows PowerShell execution still needs to be checked on Windows against two real snapshots. macOS/Linux runtime testing is not required from the user at this stage.

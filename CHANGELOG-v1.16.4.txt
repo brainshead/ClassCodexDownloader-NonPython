@@ -1,0 +1,11 @@
+# ClassCodex Downloader — v1.16.4
+
+## Windows network-path discovery fix
+
+- Hardened automatic World of Warcraft AddOns discovery against disconnected or inaccessible network paths.
+- Registry and drive-scan candidates that make Test-Path or Resolve-Path throw an IOException are now skipped so discovery can continue.
+- Explicitly configured ADDONS_PATH remains strict: if the user configures a target that cannot be accessed, the updater reports the configuration error rather than silently selecting another folder.
+
+## Testing status
+
+This is a defensive fix based on the reported Windows PowerShell error. Please test on the affected Windows system if possible; no network-share runtime environment is available here.
