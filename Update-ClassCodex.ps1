@@ -108,15 +108,29 @@ if($configuredAddons){
     function Add-WowAddonsCandidate([string]$candidate,[System.Collections.Generic.List[string]]$list){
         if([string]::IsNullOrWhiteSpace($candidate)){return}
         $p=[Environment]::ExpandEnvironmentVariables($candidate.Trim().Trim('"'))
-        if(!(Test-Path -LiteralPath $p -PathType Container)){return}
+
+        # Registry entries and drive scans can include disconnected network shares.
+        # A Test-Path call against those locations may throw IOException instead of
+        # returning $false, so skip that candidate without aborting discovery.
+        try {
+            if(!(Test-Path -LiteralPath $p -PathType Container -ErrorAction Stop)){return}
+        } catch {
+            return
+        }
+
         $leaf=Split-Path -Leaf $p
         if($leaf -ieq "AddOns"){$a=$p}
         elseif($leaf -ieq "Interface"){$a=Join-Path $p "AddOns"}
         elseif($leaf -ieq "_retail_"){$a=Join-Path $p "Interface\AddOns"}
         else{$a=Join-Path $p "_retail_\Interface\AddOns"}
-        if(Test-Path -LiteralPath $a -PathType Container){
-            $resolved=(Resolve-Path -LiteralPath $a).Path
-            if($resolved -notin $list){[void]$list.Add($resolved)}
+
+        try {
+            if(Test-Path -LiteralPath $a -PathType Container -ErrorAction Stop){
+                $resolved=(Resolve-Path -LiteralPath $a -ErrorAction Stop).Path
+                if($resolved -notin $list){[void]$list.Add($resolved)}
+            }
+        } catch {
+            # An unavailable candidate is not a valid install; keep searching.
         }
     }
 
