@@ -9,7 +9,7 @@ $Cache = Join-Path $History "ItemCache.json"
 New-Item -ItemType Directory -Force -Path $Snapshots,$ChangelogDir | Out-Null
 
 $builds=@(Get-ChildItem -LiteralPath $Snapshots -Directory | Sort-Object Name -Descending)
-if($builds.Count -lt 2){ Write-Host "At least two ClassCodex snapshots are required."; exit 0 }
+if($builds.Count -lt 2){ Write-Host "At least two ClassCodex snapshots are required." -ForegroundColor Yellow; Write-Host ""; Write-Host "Snapshot folder checked: $Snapshots"; Write-Host "The diff tool needs two snapshots created by the updater. A fresh download of this repository does not include your local update history."; Write-Host "Run the updater at least twice from this same release folder, or copy your existing ClassCodex-Update-History\Snapshots folder here."; exit 1 }
 if($NewBuild){ $newSnapshot=@($builds|Where-Object Name -eq $NewBuild|Select-Object -First 1); if(!$newSnapshot){$newSnapshot=$builds[0]} else{$newSnapshot=$newSnapshot[0]} } else{$newSnapshot=$builds[0]}
 $selectedNewBuild=$newSnapshot.Name
 $oldSnapshot=@($builds|Where-Object Name -ne $selectedNewBuild|Select-Object -First 1)
