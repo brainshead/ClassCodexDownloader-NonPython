@@ -1,0 +1,8 @@
+# ClassCodex Downloader — v1.16.5
+
+## Windows diff launcher and history diagnostics
+
+- The diff BAT launcher now unblocks only its local ClassCodex-Diff.ps1 script before launching it, preventing the downloaded-file security prompt from interrupting normal launch.
+- This does not change system-wide PowerShell execution policy.
+- Missing snapshot history now reports the exact folder checked and explains that local history is not included in a fresh repository download.
+- At least two snapshots are still required to compare builds; copy existing history into the release folder or let the updater create snapshots there.
