@@ -1,0 +1,9 @@
+# ClassCodex Downloader — v1.16.6
+
+## Fix detailed update summary crash
+
+- Fixed PowerShell regular expressions in `ClassCodex-Diff.ps1` that were over-escaped. The previous patterns caused .NET's regex parser to throw a “too many )” / “Te veel )” exception when the updater generated the detailed update summary.
+- Corrected the Icy Veins export, label, and UGG popularity patterns to use PowerShell-compatible single-quoted regex strings.
+- Normalized the Windows paths to the Icy Veins and UGG snapshot data files.
+
+This change is committed to the repair branch and has not been runtime-tested on Windows in this environment. Please test the updater against two existing snapshots before relying on the generated report.
