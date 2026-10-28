@@ -369,6 +369,21 @@ try{
         Write-Host ("Unchanged  : {0} files" -f $unchangedCount)
         Write-Host ("Removed    : {0} files" -f $removedCount)
 
+        # Always show the exact files changed by this update, even without old snapshots.
+        if($downloadItems.Count -gt 0){
+            Write-Host ""
+            Write-Host "Files downloaded/updated:" -ForegroundColor Cyan
+            foreach($f in @($downloadItems | Sort-Object { [string]$_.path })){
+                $shortRel=([string]$f.path).Substring("ClassCodex/".Length)
+                Write-Host "  ~ $shortRel"
+            }
+        }
+        if($removedFiles.Count -gt 0){
+            Write-Host ""
+            Write-Host "Files removed:" -ForegroundColor Yellow
+            foreach($oldRel in @($removedFiles | Sort-Object)){ Write-Host "  - $oldRel" }
+        }
+
         # Save a normal independent snapshot for history/rollback only.
         # The live WoW AddOn remains the update baseline; snapshots are never used
         # as the source for unchanged files during normal updates.
@@ -406,9 +421,22 @@ if(!(Test-Path -LiteralPath $diffScript -PathType Leaf)){
 }else{
     $answer=Read-Host "Generate detailed update summary now? [Y/N]"
     if($answer -match "^[Yy]$"){
-        $psExe=Join-Path $env:SystemRoot "System32\WindowsPowerShell\v1.0\powershell.exe"
-        Unblock-File -LiteralPath $diffScript -ErrorAction SilentlyContinue
-        & $psExe -NoProfile -ExecutionPolicy Bypass -File $diffScript -NewBuild $build
-        if($LASTEXITCODE -ne 0){throw "ClassCodex-Diff failed with exit code $LASTEXITCODE."}
+        $snapshotCount=@(Get-ChildItem -LiteralPath $Snapshots -Directory).Count
+        if($snapshotCount -lt 2){
+            Write-Host ""
+            Write-Host "Detailed historical comparison skipped: only one snapshot exists in this release folder." -ForegroundColor Yellow
+            Write-Host "The exact files changed in this update are listed above."
+            Write-Host "To enable historical comparisons, preserve/copy an older snapshot into:"
+            Write-Host "  $Snapshots"
+        }else{
+            $psExe=Join-Path $env:SystemRoot "System32\WindowsPowerShell\v1.0\powershell.exe"
+            Unblock-File -LiteralPath $diffScript -ErrorAction SilentlyContinue
+            & $psExe -NoProfile -ExecutionPolicy Bypass -File $diffScript -NewBuild $build
+            if($LASTEXITCODE -ne 0){
+                Write-Host ""
+                Write-Host "WARNING: The detailed historical summary failed, but the ClassCodex update completed successfully." -ForegroundColor Yellow
+                Write-Host "Use the file list printed above to see which files were updated."
+            }
+        }
     }
 }

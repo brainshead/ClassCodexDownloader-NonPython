@@ -1,0 +1,10 @@
+# ClassCodex Downloader — v1.16.7
+
+## Fix update file reporting and summary failure handling
+
+- The updater now prints the exact paths of all files it downloaded/updated and any files it removed.
+- The first update in a freshly downloaded release folder no longer turns a successful addon update into a reported failure just because there is only one snapshot.
+- If the detailed historical comparison cannot run, the updater warns that the comparison was skipped/failed while preserving the successful update result and displaying the changed-file list.
+- This matters because the repository download does not contain the user's local snapshot history; the first update can have no previous snapshot to compare.
+
+The change is committed to the repair branch. Windows PowerShell runtime testing is still required.
