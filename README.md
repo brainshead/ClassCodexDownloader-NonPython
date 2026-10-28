@@ -6,7 +6,7 @@ This is not the official downloader and is not intended to replace or impersonat
 
 ## Included release
 
-The v1.16.6 package provides:
+The v1.16.7 package provides:
 - Windows updater and detailed diff utility (PowerShell with BAT launchers)
 - Windows diff launcher uses the standard Windows PowerShell executable path directly
 - macOS updater and diff utility (Bash, using macOS osascript JavaScript support)
@@ -15,7 +15,7 @@ The v1.16.6 package provides:
 - Manifest and SHA-256 verification
 - Independent snapshots for history/rollback
 
-See the release notes in CHANGELOG-v1.16.6.txt and usage in README-v1.16.6.txt.
+See the release notes in CHANGELOG-v1.16.7.txt and usage in README-v1.16.7.txt.
 
 ## Upstream and licensing
 
@@ -25,4 +25,4 @@ ClassCodex addon data and associated third-party trademarks are not relicensed b
 
 ## Status
 
-Version: 1.16.6. Use at your own discretion; test against a separate AddOns folder before using on a live installation.
+Version: 1.16.7. Use at your own discretion; test against a separate AddOns folder before using on a live installation.
